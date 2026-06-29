@@ -1,0 +1,13 @@
+# Database files
+/data/
+*.db
+*.sqlite
+*.sqlite3
+
+# Compiled binary
+/primes
+*.exe
+
+# Go build artifacts
+*.test
+coverage.out

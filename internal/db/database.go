@@ -18,6 +18,32 @@ func NewDB(db *sql.DB) (*DB, error) {
 	return newDB, nil
 }
 
+// Initialize initializes the database connection and sets the Default variable to the new DB instance.
+func Initialize(databasePath string) error {
+	if databasePath == "" {
+		databasePath = defaultPath
+	}
+	sqlDB, err := sql.Open("sqlite", databasePath)
+	if err != nil {
+		return err
+	}
+
+	Default, err = NewDB(sqlDB)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// Close closes the database connection if it is open.
+func Close() error {
+	if Default != nil && Default.db != nil {
+		return Default.db.Close()
+	}
+	return nil
+}
+
 // CreateTable creates the "primes" table in the database if it does not already exist.
 func (d *DB) CreateTable() error {
 	_, err := d.db.Exec(`CREATE TABLE IF NOT EXISTS primes (number INTEGER PRIMARY KEY)`)
