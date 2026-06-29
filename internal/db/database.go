@@ -1,0 +1,97 @@
+//A simple package for a database of prime numbers, used by algorithms inside the libraries
+package db
+
+import (
+	"database/sql"
+	"fmt"
+)
+
+// DB represents a database connection and provides methods to interact with the database.
+// NewDB creates a new instance of DB and initializes the database by creating the necessary tables.
+func NewDB(db *sql.DB) (*DB, error) {
+	newDB := &DB{db: db}
+	err := newDB.CreateTable()
+	if err != nil {
+		return nil, err
+	}
+
+	return newDB, nil
+}
+
+// CreateTable creates the "primes" table in the database if it does not already exist.
+func (d *DB) CreateTable() error {
+	_, err := d.db.Exec(`CREATE TABLE IF NOT EXISTS primes (number INTEGER PRIMARY KEY)`)
+	return err
+}
+
+// InsertPrime inserts a single prime number into the "primes" table.
+func (d *DB) InsertPrime(number int) error {
+	_, err := d.db.Exec(`INSERT INTO primes (number) VALUES (?)`, number)
+	return err
+}
+
+// InsertPrimes inserts multiple prime numbers into the "primes" table.
+func (d *DB) InsertPrimes(numbers []int) error {
+	tx, err := d.db.Begin()
+	if err != nil {
+		return err
+	}
+
+	stmt, err := tx.Prepare(`INSERT INTO primes (number) VALUES (?)`)
+	if err != nil {
+		return err
+	}
+	defer stmt.Close()
+
+	for _, number := range numbers {
+		_, err = stmt.Exec(number)
+		if err != nil {
+			tx.Rollback()
+			return err
+		}
+	}
+
+	return tx.Commit()
+}
+
+// GetAllPrimes retrieves all prime numbers from the "primes" table.
+func (d *DB) GetAllPrimes() ([]int, error) {
+	query := 	`SELECT number
+				FROM primes`
+	return d.getPrimes(query)
+}
+
+// GetPrimesUpTo retrieves all prime numbers from the "primes" table that are less than or equal to the specified number.
+func (d *DB) GetPrimesUpTo(number int) ([]int, error) {
+	query := 	`SELECT number
+				FROM primes
+				WHERE number <= ?`
+	return d.getPrimes(query, number)
+}
+
+// getPrimes is a helper function that executes the provided query with optional conditions and returns the resulting prime numbers.
+func (d *DB) getPrimes(query string, conditions ...any) ([]int, error) {
+	rows, err := d.db.Query(query, conditions...)
+	if err != nil {
+		return nil, err
+	}
+
+	defer rows.Close()
+
+	var primes []int
+	for rows.Next() {
+		var number int
+		err = rows.Scan(&number)
+		if err != nil {
+			return nil, err
+		}
+
+		primes = append(primes, number)
+	}
+
+	if err = rows.Err(); err != nil {
+		return nil, fmt.Errorf("error iterating over rows: %v", err)
+	}
+
+	return primes, nil
+}
