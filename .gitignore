@@ -11,3 +11,6 @@
 # Go build artifacts
 *.test
 coverage.out
+
+# Config files
+config.yaml

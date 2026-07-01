@@ -1,9 +1,11 @@
-//A simple package for a database of prime numbers, used by algorithms inside the libraries
+// A simple package for a database of prime numbers, used by algorithms inside the libraries
 package db
 
 import (
 	"database/sql"
 	"fmt"
+
+	"github.com/Kareky/primes/config"
 )
 
 // DB represents a database connection and provides methods to interact with the database.
@@ -21,9 +23,9 @@ func NewDB(db *sql.DB) (*DB, error) {
 // Initialize initializes the database connection and sets the Default variable to the new DB instance.
 func Initialize(databasePath string) error {
 	if databasePath == "" {
-		databasePath = defaultPath
+		databasePath = config.Config.Database.Path
 	}
-	sqlDB, err := sql.Open("sqlite", databasePath)
+	sqlDB, err := sql.Open(config.Config.Database.Type, databasePath)
 	if err != nil {
 		return err
 	}

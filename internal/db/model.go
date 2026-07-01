@@ -9,5 +9,3 @@ type DB struct {
 }
 
 var Default *DB
-
-var defaultPath = "./data/primes.db"
