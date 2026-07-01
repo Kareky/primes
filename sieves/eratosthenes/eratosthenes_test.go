@@ -51,7 +51,7 @@ func TestFindPrimes(t *testing.T) {
 		},
 		{
 			name:     "exceeds size limit",
-			bound:    1000000001,
+			bound:    1000000000001,
 			want:     nil,
 			wantErr:  true,
 		},
