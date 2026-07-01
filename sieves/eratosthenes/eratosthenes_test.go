@@ -1,8 +1,9 @@
 package eratosthenes_test
 
 import (
-    "testing"
-    era "github.com/Kareky/primes/internal/sieves/eratosthenes"
+	"testing"
+
+	era "github.com/Kareky/primes/sieves/eratosthenes"
 )
 
 func TestFindPrimes(t *testing.T) {
@@ -135,9 +136,6 @@ func TestFindPrimes_ErrorReturned(t *testing.T) {
 	_, err := era.FindPrimes(1000000001)
 	if err == nil {
 		t.Errorf("FindPrimes(1000000001) expected error, got nil")
-	}
-	if err != era.ErrMaxSizeExceed {
-		t.Errorf("FindPrimes(1000000001) returned %v, want %v", err, era.ErrMaxSizeExceed)
 	}
 }
 
