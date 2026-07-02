@@ -5,8 +5,8 @@ import "github.com/Kareky/primes/internal/errors"
 //FindPrimes returns all prime numbers up to upperBound.
 //It returns error if upperBound exceed 1,000,000,000.
 func FindPrimes(upperBound int) ([]int, error) {
-	if upperBound > sizeLimit {
-		return nil, errors.ErrMaxSizeExceed(packageName, sizeLimit)
+	if upperBound > SizeLimit {
+		return nil, errors.ErrMaxSizeExceed(packageName, SizeLimit)
 	}
 
 	if upperBound < 2 {

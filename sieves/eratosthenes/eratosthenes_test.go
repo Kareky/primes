@@ -3,21 +3,10 @@ package eratosthenes_test
 import (
 	"testing"
 
-	"github.com/Kareky/primes/config"
 	era "github.com/Kareky/primes/sieves/eratosthenes"
 )
 
 func TestFindPrimes(t *testing.T) {
-	configPath := "./config.yaml"
-
-    cfg, err := config.Load(configPath)
-    if err != nil {
-		t.Errorf("FindPrimes() error = %v", err)
-		return
-	}
-
-	config.Config = cfg
-
 	tests := []struct {
 		name     string
 		bound    int
@@ -62,7 +51,7 @@ func TestFindPrimes(t *testing.T) {
 		},
 		{
 			name:     "exceeds size limit",
-			bound:    config.Config.Database.UpperBound+1,
+			bound:    era.SizeLimit,
 			want:     nil,
 			wantErr:  true,
 		},
@@ -96,16 +85,6 @@ func TestFindPrimes(t *testing.T) {
 }
 
 func TestFindPrimes_Completeness(t *testing.T) {
-	configPath := "./config.yaml"
-
-    cfg, err := config.Load(configPath)
-    if err != nil {
-		t.Errorf("FindPrimes() error = %v", err)
-		return
-	}
-
-	config.Config = cfg
-
 	// Ensures all numbers marked as prime are actually prime
 	// and all primes ≤ bound are present
 	primes, err := era.FindPrimes(1000)
@@ -154,19 +133,9 @@ func TestFindPrimes_Completeness(t *testing.T) {
 }
 
 func TestFindPrimes_ErrorReturned(t *testing.T) {
-	configPath := "./config.yaml"
-
-    cfg, err := config.Load(configPath)
-    if err != nil {
-		t.Errorf("FindPrimes() error = %v", err)
-		return
-	}
-
-	config.Config = cfg
-
-	_, err = era.FindPrimes(config.Config.Database.UpperBound+1)
+	_, err := era.FindPrimes(era.SizeLimit+1)
 	if err == nil {
-		t.Errorf("FindPrimes(%d) expected error, got nil", config.Config.Database.UpperBound+1)
+		t.Errorf("FindPrimes(%d) expected error, got nil", era.SizeLimit+1)
 	}
 }
 
