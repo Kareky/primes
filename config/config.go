@@ -10,29 +10,27 @@ import (
 var Config Settings
 
 type Settings struct {
-	Database 	Database `yaml:"database"`
+	Database 	Database    `yaml:"database"`
 }
 
 type Database struct {
-    Enabled    	bool   `yaml:"enabled"`
-    Type       	string `yaml:"type"`
-    Path	  	string `yaml:"path"`
-    Name       	string `yaml:"name"`
-    User       	string `yaml:"user"`
-    Pass       	string `yaml:"pass"`
-    UpperBound 	int    `yaml:"upper-bound"`
+    Enabled    	bool        `yaml:"enabled"`
+    Type       	string      `yaml:"type"`
+    Path	  	string      `yaml:"path"`
+    Name       	string      `yaml:"name"`
+    User       	string      `yaml:"user"`
+    Pass       	string      `yaml:"pass"`
 }
 
 func Default() Settings {
     return Settings{
-		Database{
+		Database: Database{
 			Enabled: 	true,
 			Type:		"sqlite",
 			Path:		"./data/primes.db",
 			Name:		"primes",
 			User:		"",
 			Pass:		"",
-			UpperBound:	1000000000,
 		},
     }
 }
