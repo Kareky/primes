@@ -59,24 +59,28 @@ func (d *DB) InsertPrime(number int) error {
 }
 
 // InsertPrimes inserts multiple prime numbers into the "primes" table.
-func (d *DB) InsertPrimes(numbers []int) error {
+func (d *DB) InsertPrimes(numbers []int, onProgress func(int, int)	) error {
 	tx, err := d.db.Begin()
 	if err != nil {
 		return err
 	}
 
-	stmt, err := tx.Prepare(`INSERT INTO primes (number) VALUES (?)`)
+	stmt, err := tx.Prepare(`INSERT or IGNORE INTO primes (number) VALUES (?)`)
 	if err != nil {
 		return err
 	}
 	defer stmt.Close()
 
-	for _, number := range numbers {
-		_, err = stmt.Exec(number)
+	for i, number := range numbers {
+		_, err := stmt.Exec(number)
 		if err != nil {
 			tx.Rollback()
 			return err
 		}
+
+		if onProgress != nil {
+            onProgress(i+1, len(numbers)) // call after each insert
+        }
 	}
 
 	return tx.Commit()
