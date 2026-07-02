@@ -32,7 +32,7 @@ func Default() Settings {
 			Name:		"primes",
 			User:		"",
 			Pass:		"",
-			UpperBound:	1000000000000,
+			UpperBound:	1000000000,
 		},
     }
 }
