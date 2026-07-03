@@ -86,6 +86,34 @@ func (d *DB) InsertPrimes(numbers []int, onProgress func(int, int)	) error {
 	return tx.Commit()
 }
 
+// Check if a number exists inside the database
+func (d *DB) Exists(number int) (bool, error) {
+	query := `SELECT EXISTS(
+				SELECT 1
+				FROM primes
+				WHERE number = ?
+				)`
+	var exists bool
+	err := d.db.QueryRow(query, number).Scan(&exists)
+	if err != nil {
+		return false, err
+	}
+
+	return exists, nil
+}
+
+func (d *DB) GetMaxPrime() (int, error) {
+	query := `	SELECT MAX(number)
+				FROM primes`
+	var maxPrime int
+	err := d.db.QueryRow(query).Scan(&maxPrime)
+	if err != nil {
+		return 0, err
+	}
+
+	return maxPrime, nil
+}
+
 // GetAllPrimes retrieves all prime numbers from the "primes" table.
 func (d *DB) GetAllPrimes() ([]int, error) {
 	query := 	`SELECT number
