@@ -102,6 +102,7 @@ func (d *DB) Exists(number int) (bool, error) {
 	return exists, nil
 }
 
+// GetMaxPrime retrieves the maximum prime number stored in the "primes" table.
 func (d *DB) GetMaxPrime() (int, error) {
 	query := `	SELECT MAX(number)
 				FROM primes`

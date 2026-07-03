@@ -7,12 +7,15 @@ import (
 	"go.yaml.in/yaml/v3"
 )
 
+// Config is the global configuration variable that holds the application settings.
 var Config Settings
 
+// Settings holds the configuration settings for the application.
 type Settings struct {
 	Database 	Database    `yaml:"database"`
 }
 
+// Database holds the configuration settings for the database connection.
 type Database struct {
     Enabled    	bool        `yaml:"enabled"`
     Type       	string      `yaml:"type"`
@@ -22,6 +25,7 @@ type Database struct {
     Pass       	string      `yaml:"pass"`
 }
 
+// Default returns the default configuration settings for the application.
 func Default() Settings {
     return Settings{
 		Database: Database{

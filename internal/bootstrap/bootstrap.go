@@ -12,6 +12,7 @@ import (
 	_ "modernc.org/sqlite"
 )
 
+// InitConfig initializes the configuration by loading it from the specified path and setting it in the global config variable.
 func InitConfig(configPath string) {
 	log.Println("Initializing configuration...")
     cfg, err := config.Load(configPath)
@@ -24,6 +25,8 @@ func InitConfig(configPath string) {
 	log.Println("Configuration initialized")
 }
 
+// InitDatabase initializes the database at the specified path. It creates a new database connection and updates the size limit
+// for the division primality test based on the maximum prime number stored in the database.
 func InitDatabase(databasePath string) {
 	log.Printf("Initializing database at path %s...", databasePath)
 	err := database.Initialize(databasePath)
@@ -38,6 +41,8 @@ func InitDatabase(databasePath string) {
 	log.Println("Database initialized")
 }
 
+// SeedDatabase seeds the database with prime numbers up to the specified upper bound using the specified algorithm.
+// If a database path is provided, it creates a new database connection; otherwise, it uses the default database connection.
 func SeedDatabase(dbPath string, dbType string, upperBound int, algorithm string) {
 	var db *database.DB
 	if dbPath != "" {
