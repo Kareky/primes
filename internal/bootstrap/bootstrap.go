@@ -45,18 +45,18 @@ func InitDatabase(databasePath string) {
 // If a database path is provided, it creates a new database connection; otherwise, it uses the default database connection.
 func SeedDatabase(dbPath string, dbType string, upperBound int, algorithm string) {
 	var db *database.DB
-	if dbPath != "" {
-		sqlDB, err := sql.Open(dbType, dbPath)
-		if err != nil {
-			log.Fatal(err)
-		}
+	if dbPath == "" {
+		dbPath = config.Default().Database.Path
+	}
 
-		db, err = database.NewDB(sqlDB)
-		if err != nil {
-			log.Fatal(err)
-		}
-	} else {
-		db = database.Default
+	sqlDB, err := sql.Open(dbType, dbPath)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	db, err = database.NewDB(sqlDB)
+	if err != nil {
+		log.Fatal(err)
 	}
 
 	seeder.NewSeed(db).PopulatePrimesSeed(upperBound, algorithm)
