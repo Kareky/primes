@@ -4,6 +4,8 @@ package db
 import (
 	"database/sql"
 	"fmt"
+	"math"
+	"strings"
 
 	"github.com/Kareky/primes/config"
 )
@@ -25,9 +27,22 @@ func Initialize(databasePath string) error {
 	if databasePath == "" {
 		databasePath = config.Config.Database.Path
 	}
+
 	sqlDB, err := sql.Open(config.Config.Database.Type, databasePath)
 	if err != nil {
 		return err
+	}
+
+	stmts := []string{
+		"PRAGMA temp_store = MEMORY;",
+		"PRAGMA mmap_size = 268435456;",
+		"PRAGMA cache_size = -64000;",
+		"PRAGMA synchronous = OFF;",
+		"PRAGMA journal_mode = WAL;",
+	}
+
+	for _, s := range stmts {
+		sqlDB.Exec(s)
 	}
 
 	Default, err = NewDB(sqlDB)
@@ -132,22 +147,34 @@ func (d *DB) GetPrimesUpTo(number int) ([]int, error) {
 
 // getPrimes is a helper function that executes the provided query with optional conditions and returns the resulting prime numbers.
 func (d *DB) getPrimes(query string, conditions ...any) ([]int, error) {
+	var sliceSize int
+    if len(conditions) > 0 {
+        if bound, ok := conditions[0].(int); ok {
+            sliceSize = int(float64(bound) / math.Log(float64(bound)))
+        }
+    } else {
+		countQuery := strings.Replace(query, "SELECT number", "SELECT COUNT(*)", 1)
+    	err := d.db.QueryRow(countQuery, conditions...).Scan(&sliceSize)
+		if err != nil {
+			return nil, err
+		}
+	}
+
 	rows, err := d.db.Query(query, conditions...)
 	if err != nil {
 		return nil, err
 	}
 
 	defer rows.Close()
-
-	var primes []int
+	var primes = make([]int, 0, sliceSize)
 	for rows.Next() {
-		var number int
+		var number int64
 		err = rows.Scan(&number)
 		if err != nil {
 			return nil, err
 		}
 
-		primes = append(primes, number)
+		primes = append(primes, int(number))
 	}
 
 	if err = rows.Err(); err != nil {
