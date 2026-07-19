@@ -8,13 +8,14 @@ import (
 
 // IsPrime checks if a number is prime using the Fermat primality test.
 // It first checks if the number is less than 2, in which case it returns false.
+// or if it not 2 or 3, in which case it returns true.
 // It then performs a specified number of repetitions (default is 5) of the test,
 // where it randomly selects a base up to (number-1) and checks if the modular exponentiation condition holds.
 // If any repetition fails, it returns false, indicating that the number is composite.
 // If all repetitions pass, it returns true, indicating that the number is likely prime.
 func IsPrime(number int, iter ...int) bool {
-	if number < 2 {
-		return false
+	if number <= 3 {
+		return number > 1
 	}
 
 	reps := 5
@@ -33,7 +34,7 @@ func IsPrime(number int, iter ...int) bool {
 		if math.ModularExp(base, number, number-1) != 1 {
 			return false
 		}
-		log.Printf("Repetition number %d", i)
+		log.Printf("Repetition number %d", i+1)
 	}
 
 	return true
