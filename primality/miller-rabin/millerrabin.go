@@ -51,7 +51,7 @@ func IsPrime(number int, iter ...int) bool {
 func millerRabin(number, d, s int) bool {
 	a := 2 + rand.IntN(number-3)
 
-	x := math.ModularExp(a, d, number)
+	x := math.ModularExp(a, number, d)
 	if x == 1 || x == number-1 {
 		return true
 	}
