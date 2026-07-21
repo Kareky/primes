@@ -40,3 +40,55 @@ func FindPrimes(upperBound int) ([]int, error) {
 
 	return primeList, nil
 }
+
+//FindPrimesWithChannel returns a channel that yields all prime numbers up to upperBound.
+//It returns error if upperBound exceed 1,000,000,000.
+func FindPrimesWithChannel(upperBound int) (<-chan int, error) {
+	if upperBound > SizeLimit {
+		return nil, errors.ErrMaxSizeExceed(packageName, SizeLimit)
+	}
+
+	primes := make(chan int)
+
+	go func(){
+		defer close(primes)
+
+		if upperBound < 2 {
+			return
+		}
+
+		
+		primes <- 2
+		if upperBound == 2 {
+			return
+		}
+
+		primes <- 3
+		if upperBound == 3 {
+			return
+		}
+
+		// Slice stores odd numbers starting at 3: index i represents 2*i+3
+    	// true = marked composite, false = still prime candidate
+		var numberList = make([]bool, (upperBound-1)/2)
+		
+		for i := range numberList {
+			if numberList[i] {
+				continue // composite number, aka true value indexes, are skipped
+			}
+
+			p := i*2+3
+			primes <- p
+		
+			if p*p <= upperBound {
+				for c := p*p; c <= upperBound; c+=2*p {
+					j := (c-3) /2
+					numberList[j] = true
+				}
+			}
+		}
+	}()
+	
+
+	return primes, nil
+}
