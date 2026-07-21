@@ -150,3 +150,163 @@ func BenchmarkFindPrimes_1e9(b *testing.B) {
         era.FindPrimes(1000000000)
     }
 }
+
+// readAll reads all integers from a channel until it closes.
+func readAll(ch <-chan int) []int {
+	var primes []int
+	for p := range ch {
+		primes = append(primes, p)
+	}
+	return primes
+}
+
+func TestFindPrimesWithChannel(t *testing.T) {
+	tests := []struct {
+		name    string
+		bound   int
+		want    []int
+		wantErr bool
+	}{
+		{
+			name:    "less than 2",
+			bound:   1,
+			want:    []int{},
+			wantErr: false,
+		},
+		{
+			name:    "bound 2",
+			bound:   2,
+			want:    []int{2},
+			wantErr: false,
+		},
+		{
+			name:    "bound 3",
+			bound:   3,
+			want:    []int{2, 3},
+			wantErr: false,
+		},
+		{
+			name:    "bound 10",
+			bound:   10,
+			want:    []int{2, 3, 5, 7},
+			wantErr: false,
+		},
+		{
+			name:    "bound 30",
+			bound:   30,
+			want:    []int{2, 3, 5, 7, 11, 13, 17, 19, 23, 29},
+			wantErr: false,
+		},
+		{
+			name:    "bound 100",
+			bound:   100,
+			want:    []int{2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 53, 59, 61, 67, 71, 73, 79, 83, 89, 97},
+			wantErr: false,
+		},
+		{
+			name:    "exceeds size limit",
+			bound:   era.SizeLimit + 1,
+			want:    nil,
+			wantErr: true,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			ch, err := era.FindPrimesWithChannel(tt.bound)
+
+			if (err != nil) != tt.wantErr {
+				t.Errorf("FindPrimesWithChannel() error = %v, wantErr %v", err, tt.wantErr)
+				return
+			}
+
+			if tt.wantErr {
+				return
+			}
+
+			got := readAll(ch)
+
+			if len(got) != len(tt.want) {
+				t.Errorf("FindPrimesWithChannel() length = %d, want %d", len(got), len(tt.want))
+				return
+			}
+
+			for i := range got {
+				if got[i] != tt.want[i] {
+					t.Errorf("FindPrimesWithChannel() at index %d = %d, want %d", i, got[i], tt.want[i])
+				}
+			}
+		})
+	}
+}
+
+func TestFindPrimesWithChannel_Completeness(t *testing.T) {
+	ch, err := era.FindPrimesWithChannel(1000)
+	if err != nil {
+		t.Fatalf("FindPrimesWithChannel(1000) failed: %v", err)
+	}
+	primes := readAll(ch)
+
+	// Check sorted order
+	for i := 1; i < len(primes); i++ {
+		if primes[i] <= primes[i-1] {
+			t.Errorf("primes not sorted: %d > %d at indices %d, %d", primes[i-1], primes[i], i-1, i)
+		}
+	}
+
+	// Check each prime is actually prime
+	for _, p := range primes {
+		for d := 2; d*d <= p; d++ {
+			if p%d == 0 {
+				t.Errorf("%d is not prime (divisible by %d)", p, d)
+			}
+		}
+	}
+
+	// Check no primes are missing
+	primeMap := make(map[int]bool)
+	for _, p := range primes {
+		primeMap[p] = true
+	}
+
+	for n := 2; n <= 1000; n++ {
+		isPrime := true
+		for d := 2; d*d <= n; d++ {
+			if n%d == 0 {
+				isPrime = false
+				break
+			}
+		}
+		if isPrime && !primeMap[n] {
+			t.Errorf("%d is prime but missing from result", n)
+		}
+		if !isPrime && primeMap[n] {
+			t.Errorf("%d is composite but included in result", n)
+		}
+	}
+}
+
+func TestFindPrimesWithChannel_ErrorReturned(t *testing.T) {
+	_, err := era.FindPrimesWithChannel(era.SizeLimit + 1)
+	if err == nil {
+		t.Errorf("FindPrimesWithChannel(%d) expected error, got nil", era.SizeLimit+1)
+	}
+}
+
+func BenchmarkFindPrimesWithChannel_1e7(b *testing.B) {
+	for b.Loop() {
+		ch, _ := era.FindPrimesWithChannel(10000000)
+		for range ch {
+			// consume
+		}
+	}
+}
+
+func BenchmarkFindPrimesWithChannel_1e9(b *testing.B) {
+	for b.Loop() {
+		ch, _ := era.FindPrimesWithChannel(1000000000)
+		for range ch {
+			// consume
+		}
+	}
+}
