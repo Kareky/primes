@@ -14,7 +14,16 @@ func FindPrimes(upperBound int) ([]int, error) {
 	}
 
 	var primeList = []int{}
+	if upperBound == 2 {
+		primeList = append(primeList, 2)
+		return primeList, nil
+	}
+
 	primeList = append(primeList, 2, 3)
+	if upperBound == 3 {
+		return primeList, nil
+	}
+
 	// Slice stores odd numbers starting at 3: index i represents 2*i+3
     // true = marked composite, false = still prime candidate
 	var numberList = make([]bool, upperBound+1)
