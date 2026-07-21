@@ -63,11 +63,6 @@ func FindPrimesWithChannel(upperBound int) (<-chan int, error) {
 			return
 		}
 
-		primes <- 3
-		if upperBound == 3 {
-			return
-		}
-
 		// Slice stores odd numbers starting at 3: index i represents 2*i+3
     	// true = marked composite, false = still prime candidate
 		var numberList = make([]bool, (upperBound-1)/2)
