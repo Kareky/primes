@@ -19,7 +19,7 @@ func FindPrimes(upperBound int) ([]int, error) {
     // true = marked composite, false = still prime candidate
 	var numberList = make([]bool, (upperBound-1)/2)
 	
-	for i := 0; i < len(numberList); i++ {
+	for i := range numberList {
 		if numberList[i] {
 			continue // composite number, aka true value indexes, are skipped
 		}
